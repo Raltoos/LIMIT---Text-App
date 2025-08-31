@@ -27,14 +27,12 @@ export default function App() {
     setTimeout(() => setJustHitLimit(false), 1000);
   };
 
-  // compute projected word count after an edit (for beforeinput/paste)
   const projectWordCount = (currentText, insertion, selStart, selEnd) => {
     const nextText =
       currentText.slice(0, selStart) + insertion + currentText.slice(selEnd);
     return countWords(nextText);
   };
 
-  // Allow operations that reduce text (so users can delete even when over limit)
   const isDeletionInputType = (type) =>
     [
       "deleteContentBackward",
@@ -44,7 +42,6 @@ export default function App() {
       "historyUndo",
     ].includes(type);
 
-  // Block typing the moment the limit is reached
   const onBeforeInput = (e) => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -56,19 +53,11 @@ export default function App() {
     const selStart = ta.selectionStart;
     const selEnd = ta.selectionEnd;
 
-    // If at or beyond limit and the insertion would increase word count, block
     const projected = projectWordCount(value, data, selStart, selEnd);
 
     if (projected > limit) {
       e.preventDefault();
       triggerLimitFeedback();
-    } else if (words >= limit && data && data.trim().length > 0) {
-      // already at limit, any non-whitespace insertion should be blocked
-      const addsWord = /\S/.test(data);
-      if (addsWord) {
-        e.preventDefault();
-        triggerLimitFeedback();
-      }
     }
   };
 
@@ -106,10 +95,8 @@ export default function App() {
     triggerLimitFeedback();
   };
 
-  // Standard input handler (won’t be able to exceed due to beforeinput/paste guards).
   const onChange = (e) => {
     const next = e.target.value;
-    // Safety net: if somehow over, trim back
     if (countWords(next) > limit) {
       // trim to first `limit` words
       const trimmed = next.trim().split(/\s+/).slice(0, limit).join(" ");
@@ -120,29 +107,17 @@ export default function App() {
     }
   };
 
-  // Limit change UX — keep it sane (and allow lowering below current words; user can delete)
   const onChangeLimit = (v) => {
     const n = Number(v);
     if (Number.isFinite(n) && n > 0 && n <= 10000) {
       setLimit(Math.floor(n));
       if (countWords(value) > n) {
-        // Visual hint that they're above the new limit
         setShake(true);
         setTimeout(() => setShake(false), 400);
       }
     }
   };
 
-  // Keyboard affordance: prevent Enter if it would push a new word on an empty line at limit
-  const onKeyDown = (e) => {
-    if (words >= limit && e.key.length === 1 && /\S/.test(e.key)) {
-      // regular character would likely add a word
-      // We'll let beforeinput handle blocking, but this covers some browsers
-      triggerLimitFeedback();
-    }
-  };
-
-  // Focus the editor on mount for a smooth demo
   useEffect(() => {
     textareaRef.current?.focus();
   }, []);
@@ -253,7 +228,6 @@ export default function App() {
             onChange={onChange}
             onBeforeInput={onBeforeInput}
             onPaste={onPaste}
-            onKeyDown={onKeyDown}
             placeholder="Start writing…"
             spellCheck={true}
             className={[
@@ -283,8 +257,7 @@ export default function App() {
         </div>
 
         <p className="mt-3 text-xs text-zinc-500">
-          Counting method: words split on whitespace. Exact limit enforcement on
-          type & paste. Deletions are always allowed.
+          Counting method: words split on whitespace. 
         </p>
       </div>
     </div>
