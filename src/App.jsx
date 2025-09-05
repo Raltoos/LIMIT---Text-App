@@ -574,17 +574,23 @@ const App = () => {
                                 <h3 className="font-medium text-zinc-900 line-clamp-2 group-hover:text-pink-600 transition-colors">
                                   {file.name}
                                 </h3>
-                                <div className="flex items-center gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
                                   <button
-                                    onClick={() => loadFile(file)}
-                                    className="p-1.5 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors z-10 relative"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      loadFile(file);
+                                    }}
+                                    className="p-1.5 text-zinc-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
                                     title="Edit"
                                   >
                                     <Edit3 className="h-4 w-4" />
                                   </button>
                                   <button
-                                    onClick={() => deleteFile(file)}
-                                    className="p-1.5 text-zinc-500 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors z-10 relative"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteFile(file);
+                                    }}
+                                    className="p-1.5 text-zinc-500 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
                                     title="Delete"
                                   >
                                     <Trash2 className="h-4 w-4" />
@@ -592,24 +598,23 @@ const App = () => {
                                 </div>
                               </div>
                               
-                              <p className="text-sm text-zinc-500 line-clamp-3 mb-4 leading-relaxed">
-                                {file.content.substring(0, 150)}
-                                {file.content.length > 150 && '...'}
-                              </p>
-                              
-                              <div className="flex items-center justify-between text-xs text-zinc-400">
-                                <span>{file.wordCount} words</span>
-                                <span>
-                                  {new Date(file.lastModified).toLocaleDateString()}
-                                </span>
+                              <div 
+                                onClick={() => loadFile(file)}
+                                className="cursor-pointer"
+                              >
+                                <p className="text-sm text-zinc-500 line-clamp-3 mb-4 leading-relaxed">
+                                  {file.content.substring(0, 150)}
+                                  {file.content.length > 150 && '...'}
+                                </p>
+                                
+                                <div className="flex items-center justify-between text-xs text-zinc-400">
+                                  <span>{file.wordCount} words</span>
+                                  <span>
+                                    {new Date(file.lastModified).toLocaleDateString()}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                            
-                            <button
-                              onClick={() => loadFile(file)}
-                              className="absolute inset-0 w-full h-full"
-                              aria-label={`Open ${file.name}`}
-                            />
                           </div>
                         ))}
                       </div>
