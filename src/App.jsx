@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, use } from 'react';
 import { FileText, Save, FolderOpen, Edit3, Trash2, Plus, Search, X } from 'lucide-react';
 
 const App = () => {
@@ -22,6 +22,36 @@ const App = () => {
 
   // File System Access API check
   const isFileSystemSupported = 'showDirectoryPicker' in window;
+
+  useEffect(() => {
+    const savedText = localStorage.getItem('editorText') || '';
+    console.log("what i found", savedText);
+    
+    setValue(savedText);
+
+    const saveLimit = parseInt(localStorage.getItem('wordLimit'), 10);
+    if (saveLimit && !isNaN(saveLimit) && saveLimit != 500) {
+      setLimit(saveLimit);
+    }
+  }, []);
+
+  const setLocalStorage = (key, val) => {
+    try {
+      localStorage.setItem(key, val);
+    } catch (e) {
+      console.error('Error saving to localStorage', e);
+    }
+  };
+
+  useEffect(() => {
+    if(value != ''){
+      setLocalStorage('editorText', value);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    setLocalStorage('wordLimit', limit);   
+  }, [limit]);
 
   const triggerShake = useCallback(() => {
     setShake(true);
@@ -408,7 +438,7 @@ const App = () => {
                 onBeforeInput={onBeforeInput}
                 onPaste={onPaste}
                 placeholder="Start writing your essay..."
-                spellCheck={true}
+                spellCheck={false}
                 className={[
                   "w-full resize-y",
                   "min-h-[50vh] md:min-h-[55vh] lg:min-h-[58vh]",
